@@ -4,18 +4,23 @@ import { QueueView } from './components/QueueView';
 import { Cases } from './components/Cases';
 import { CaseRecord } from './components/CaseRecord';
 
-export const router = createBrowserRouter([
-  {
-    path: '/',
-    Component: RootLayout,
-    children: [
-      { index: true, Component: QueueView },
-      { path: 'cases', Component: Cases },
-      { path: 'cases/:caseId', Component: CaseRecord },
-      { path: '*', Component: NotFound },
-    ],
-  },
-]);
+export const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      Component: RootLayout,
+      children: [
+        { index: true, Component: QueueView },
+        { path: 'cases', Component: Cases },
+        { path: 'cases/:caseId', Component: CaseRecord },
+        { path: '*', Component: NotFound },
+      ],
+    },
+  ],
+  // import.meta.env.BASE_URL is '/' in dev and '/Patientsupportspecialistworkspace/' in production,
+  // matching the base set in vite.config.ts. This ensures React Router navigates correctly on GitHub Pages.
+  { basename: import.meta.env.BASE_URL }
+);
 
 function NotFound() {
   return (
