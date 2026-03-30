@@ -3,6 +3,7 @@ import { AlertCircle, ArrowRight, Clock, AlertTriangle, ChevronDown, ChevronUp }
 import { mockCases, priorityActions, queueMetrics } from '../data/mockData';
 import { Case, ActionType } from '../types/case';
 import { CaseDrawer } from './CaseDrawer';
+import { getStatusLabel, getStatusPillStyle, getDaysOpenColor } from '../utils/caseHelpers';
 
 export function QueueView() {
   const [showAllCases, setShowAllCases] = useState(false);
@@ -127,6 +128,7 @@ export function QueueView() {
                               <div className="flex items-center gap-2 flex-shrink-0">
                                 <button
                                   onClick={() => handleSelectCase(caseData.id)}
+                                  style={{ width: '160px' }}
                                   className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                                     caseData.nextBestAction.actionType === 'confirm'
                                       ? 'bg-[#10b981] hover:bg-[#0ea572] text-white'

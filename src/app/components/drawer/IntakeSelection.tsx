@@ -13,18 +13,18 @@ const intakeOptions = [
     color: 'blue',
   },
   {
-    id: 'document' as const,
-    label: 'Document Upload',
-    description: 'Drag & drop files with AI extraction',
-    icon: Upload,
-    color: 'green',
-  },
-  {
     id: 'email' as const,
     label: 'Email Forward',
     description: 'Process forwarded emails and attachments',
     icon: Mail,
     color: 'purple',
+  },
+  {
+    id: 'document' as const,
+    label: 'Document Upload',
+    description: 'Drag & drop files with AI extraction',
+    icon: Upload,
+    color: 'green',
   },
   {
     id: 'manual' as const,

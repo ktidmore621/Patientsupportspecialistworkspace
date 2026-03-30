@@ -4,9 +4,7 @@ import { DrawerContent } from './RootLayout';
 import { IntakeSelection } from './drawer/IntakeSelection';
 import { CallCenterIntake } from './intake/CallCenterIntake';
 import { DocumentUploadIntake } from './intake/DocumentUploadIntake';
-import { EmailForwardIntake } from './intake/EmailForwardIntake';
 import { ManualEntryIntake } from './intake/ManualEntryIntake';
-import { UploadDocumentFlow } from './drawer/UploadDocumentFlow';
 import { LogCallFlow } from './drawer/LogCallFlow';
 import { SendEmailFlow } from './drawer/SendEmailFlow';
 
@@ -90,16 +88,18 @@ export function UniversalDrawer({ content, onClose }: UniversalDrawerProps) {
           <DocumentUploadIntake onComplete={onClose} />
         )}
 
+        {/* Use SendEmailFlow for Email Forward intake */}
         {content.type === 'intake' && selectedIntake === 'email' && (
-          <EmailForwardIntake onComplete={onClose} />
+          <SendEmailFlow onComplete={onClose} />
         )}
 
         {content.type === 'intake' && selectedIntake === 'manual' && (
           <ManualEntryIntake onComplete={onClose} />
         )}
 
+        {/* Use the same DocumentUploadIntake for standalone upload */}
         {content.type === 'upload' && (
-          <UploadDocumentFlow onComplete={onClose} />
+          <DocumentUploadIntake onComplete={onClose} />
         )}
 
         {content.type === 'call' && (

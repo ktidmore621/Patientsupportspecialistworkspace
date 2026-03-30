@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Upload, FileText, X, CheckCircle2, Sparkles, AlertCircle } from 'lucide-react';
+import { Upload, FileText, X, CheckCircle2, Sparkles, AlertCircle, Search, Loader2, UserCheck, XCircle, User } from 'lucide-react';
+import { mockCases } from '../../data/mockData';
 
 interface DocumentUploadIntakeProps {
   onComplete: () => void;
@@ -12,10 +13,41 @@ interface UploadedFile {
   type: string;
 }
 
+interface PatientMatch {
+  caseId: string;
+  patientName: string;
+  phone: string;
+  confidence: number;
+}
+
 export function DocumentUploadIntake({ onComplete }: DocumentUploadIntakeProps) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractedData, setExtractedData] = useState<any>(null);
+  const [isMatching, setIsMatching] = useState(false);
+  const [matchCandidates, setMatchCandidates] = useState<PatientMatch[]>([]);
+  const [linkedPatient, setLinkedPatient] = useState<PatientMatch | null>(null);
+  const [showManualSearch, setShowManualSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [caseSearchQuery, setCaseSearchQuery] = useState('');
+  const [showCaseSearchResults, setShowCaseSearchResults] = useState(false);
+  const [linkedCase, setLinkedCase] = useState<any>(null);
+
+  // Filter cases based on search query for case linking
+  const caseSearchResults = caseSearchQuery.length > 0
+    ? mockCases.filter(c => 
+        c.patient.firstName.toLowerCase().includes(caseSearchQuery.toLowerCase()) ||
+        c.patient.lastName.toLowerCase().includes(caseSearchQuery.toLowerCase()) ||
+        c.id.toLowerCase().includes(caseSearchQuery.toLowerCase()) ||
+        (c.patient.phone && c.patient.phone.includes(caseSearchQuery))
+      ).slice(0, 5)
+    : [];
+
+  const handleLinkCase = (caseItem: any) => {
+    setLinkedCase(caseItem);
+    setCaseSearchQuery('');
+    setShowCaseSearchResults(false);
+  };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -45,12 +77,31 @@ export function DocumentUploadIntake({ onComplete }: DocumentUploadIntakeProps) 
     setTimeout(() => {
       setIsExtracting(false);
       setExtractedData({
-        patientName: 'John Smith',
-        dateOfBirth: '1985-03-15',
-        phone: '(555) 123-4567',
+        patientName: 'Maria Rodriguez',
+        dateOfBirth: '1967-08-15',
+        phone: '(555) 234-9012',
         insurance: 'Blue Cross Blue Shield',
         confidence: 0.94,
       });
+      
+      // Start patient matching immediately after extraction
+      setIsMatching(true);
+      setTimeout(() => {
+        setIsMatching(false);
+        // High-confidence match found - auto-select
+        const highConfidenceMatch: PatientMatch = {
+          caseId: 'PSP-2024-1847',
+          patientName: 'Maria Rodriguez',
+          phone: '(555) 234-9012',
+          confidence: 0.96
+        };
+        setMatchCandidates([
+          highConfidenceMatch,
+          { caseId: 'PSP-2024-1823', patientName: 'Jennifer Kim', phone: '(555) 123-7890', confidence: 0.72 }
+        ]);
+        // Auto-link high confidence match
+        setLinkedPatient(highConfidenceMatch);
+      }, 1500);
     }, 2000);
   };
 
@@ -65,8 +116,25 @@ export function DocumentUploadIntake({ onComplete }: DocumentUploadIntakeProps) 
   };
 
   const handleSubmit = () => {
-    console.log('Creating case from document upload:', { files, extractedData });
+    if (!linkedPatient) {
+      alert('Please link a patient before creating the case');
+      return;
+    }
+    console.log('Creating case from document upload:', { files, extractedData, linkedPatient });
     onComplete();
+  };
+
+  const handleUnlink = () => {
+    setLinkedPatient(null);
+  };
+
+  const handleLinkPatient = (patient: PatientMatch) => {
+    setLinkedPatient(patient);
+    setShowManualSearch(false);
+  };
+
+  const handleManualSearch = () => {
+    setShowManualSearch(true);
   };
 
   return (
@@ -156,7 +224,7 @@ export function DocumentUploadIntake({ onComplete }: DocumentUploadIntakeProps) 
         )}
 
         {/* Extracted Data Preview */}
-        {extractedData && (
+        {extractedData && !linkedPatient && (
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-neutral-900">AI Extracted Data</h3>
@@ -169,14 +237,7 @@ export function DocumentUploadIntake({ onComplete }: DocumentUploadIntakeProps) 
             </div>
             
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-green-700 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-green-900">
-                  Review and confirm the extracted information before creating the case.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-neutral-700 mb-1">
                     Patient Name
@@ -184,19 +245,8 @@ export function DocumentUploadIntake({ onComplete }: DocumentUploadIntakeProps) 
                   <input
                     type="text"
                     value={extractedData.patientName}
-                    onChange={(e) => setExtractedData({ ...extractedData, patientName: e.target.value })}
-                    className="w-full px-3 py-2 border border-green-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-neutral-700 mb-1">
-                    Date of Birth
-                  </label>
-                  <input
-                    type="date"
-                    value={extractedData.dateOfBirth}
-                    onChange={(e) => setExtractedData({ ...extractedData, dateOfBirth: e.target.value })}
-                    className="w-full px-3 py-2 border border-green-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    readOnly
+                    className="w-full px-3 py-2 border border-green-300 bg-white rounded-lg text-sm"
                   />
                 </div>
                 <div>
@@ -206,23 +256,189 @@ export function DocumentUploadIntake({ onComplete }: DocumentUploadIntakeProps) 
                   <input
                     type="tel"
                     value={extractedData.phone}
-                    onChange={(e) => setExtractedData({ ...extractedData, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-green-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-neutral-700 mb-1">
-                    Insurance
-                  </label>
-                  <input
-                    type="text"
-                    value={extractedData.insurance}
-                    onChange={(e) => setExtractedData({ ...extractedData, insurance: e.target.value })}
-                    className="w-full px-3 py-2 border border-green-300 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    readOnly
+                    className="w-full px-3 py-2 border border-green-300 bg-white rounded-lg text-sm"
                   />
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Patient Matching Loading */}
+        {isMatching && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+              <div>
+                <p className="text-sm font-medium text-blue-900">
+                  Matching document to patient...
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Linked Patient Banner */}
+        {linkedPatient && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-3">
+                <UserCheck className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-green-900">
+                    Linked to: {linkedPatient.patientName}
+                  </p>
+                  <div className="mt-1 space-y-0.5">
+                    <p className="text-xs text-green-700">Case ID: {linkedPatient.caseId}</p>
+                    <p className="text-xs text-green-700">Phone: {linkedPatient.phone}</p>
+                    <p className="text-xs text-green-700">Confidence: {Math.round(linkedPatient.confidence * 100)}%</p>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={handleUnlink}
+                className="text-sm text-green-700 hover:text-green-800 font-medium underline"
+              >
+                Unlink
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Match Candidates (if no link or manual search) */}
+        {matchCandidates.length > 0 && !linkedPatient && (
+          <div>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-3">Match Candidates</h3>
+            <div className="space-y-2">
+              {matchCandidates.map((candidate) => (
+                <div
+                  key={candidate.caseId}
+                  className="p-4 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-neutral-900">{candidate.patientName}</p>
+                      <div className="mt-1 space-y-0.5">
+                        <p className="text-xs text-neutral-600">Case ID: {candidate.caseId}</p>
+                        <p className="text-xs text-neutral-600">Phone: {candidate.phone}</p>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <div className={`w-2 h-2 rounded-full ${candidate.confidence > 0.9 ? 'bg-green-500' : 'bg-amber-500'}`} />
+                          <span className="text-xs text-neutral-600">
+                            {Math.round(candidate.confidence * 100)}% match
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleLinkPatient(candidate)}
+                      className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Link
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 text-center">
+              <button
+                onClick={handleManualSearch}
+                className="text-sm text-blue-700 hover:text-blue-800 font-medium"
+              >
+                Can't find the patient? Search manually
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Manual Search Field */}
+        {showManualSearch && (
+          <div>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-3">Manual Patient Search</h3>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name, case ID, or phone..."
+                  className="w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <button
+                className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                Search
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Case Linking Search Field */}
+        {linkedCase === null && (
+          <div>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-3">Link to Existing Case (Optional)</h3>
+            <div className="relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <input
+                  type="text"
+                  value={caseSearchQuery}
+                  onChange={(e) => {
+                    setCaseSearchQuery(e.target.value);
+                    setShowCaseSearchResults(e.target.value.length > 0);
+                  }}
+                  onFocus={() => setShowCaseSearchResults(caseSearchQuery.length > 0)}
+                  placeholder="Search by name, case ID, or phone..."
+                  className="w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Case Search Results Dropdown */}
+              {showCaseSearchResults && caseSearchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                  {caseSearchResults.map((caseItem) => (
+                    <button
+                      key={caseItem.id}
+                      type="button"
+                      onClick={() => handleLinkCase(caseItem)}
+                      className="w-full px-3 py-2.5 hover:bg-neutral-50 transition-colors text-left flex items-center gap-3 border-b border-neutral-100 last:border-b-0"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <User className="w-4 h-4 text-blue-700" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-neutral-900">
+                          {caseItem.patient.firstName} {caseItem.patient.lastName}
+                        </div>
+                        <div className="text-xs text-neutral-500">
+                          {caseItem.id} • {caseItem.patient.phone}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Linked Case Indicator */}
+            {linkedCase && (
+              <div className="mt-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+                <User className="w-4 h-4 text-blue-700" />
+                <span className="text-sm text-blue-900">
+                  Linked to: <span className="font-medium">{linkedCase.patient.firstName} {linkedCase.patient.lastName}</span> ({linkedCase.id})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setLinkedCase(null)}
+                  className="ml-auto text-xs text-blue-700 hover:text-blue-900 font-medium"
+                >
+                  Unlink
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -237,7 +453,7 @@ export function DocumentUploadIntake({ onComplete }: DocumentUploadIntakeProps) 
         </button>
         <button
           onClick={handleSubmit}
-          disabled={files.length === 0}
+          disabled={!linkedPatient}
           className="px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <CheckCircle2 className="w-4 h-4" />

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Filter, Download, Search, ChevronDown } from 'lucide-react';
 import { mockCases } from '../data/mockData';
 import { CaseDrawer } from './CaseDrawer';
+import { getNBAChipStyle, getNBAChipLabel, getDaysOpenColor, getStatusLabel, getStatusPillStyle } from '../utils/caseHelpers';
+import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 
 export function Cases() {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
@@ -178,22 +180,38 @@ export function Cases() {
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <span className="text-sm text-neutral-700">
+                            <span className={`text-sm font-medium ${getDaysOpenColor(caseItem.daysOpen)}`}>
                               {caseItem.daysOpen}
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <span className="text-sm text-neutral-700">
-                              {caseItem.nextBestAction.action}
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getNBAChipStyle(caseItem.nextBestAction.actionType)}`}>
+                              {getNBAChipLabel(caseItem.nextBestAction.actionType)}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             {caseItem.blockers.length > 0 ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-xs font-medium">
-                                {caseItem.blockers.length}
-                              </span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded text-xs font-medium cursor-help">
+                                    {caseItem.blockers.length}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs bg-neutral-900 text-white">
+                                  <div className="space-y-1">
+                                    {caseItem.blockers.map((blocker, idx) => (
+                                      <div key={idx} className="text-xs">
+                                        {blocker.description}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
                             ) : (
-                              <span className="text-xs text-neutral-500">None</span>
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                <span className="text-xs text-neutral-500">None</span>
+                              </div>
                             )}
                           </td>
                         </tr>

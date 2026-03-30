@@ -1,8 +1,14 @@
-import { useState } from 'react';
-import { CheckCircle2, User, Building2, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle2, User, Building2, FileText, AlertTriangle } from 'lucide-react';
 
 interface ManualEntryIntakeProps {
   onComplete: () => void;
+}
+
+interface PossibleMatch {
+  caseId: string;
+  patientName: string;
+  phone: string;
 }
 
 export function ManualEntryIntake({ onComplete }: ManualEntryIntakeProps) {
@@ -36,6 +42,8 @@ export function ManualEntryIntake({ onComplete }: ManualEntryIntakeProps) {
     diagnosis: '',
   });
 
+  const [possibleMatches, setPossibleMatches] = useState<PossibleMatch[]>([]);
+
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -45,6 +53,32 @@ export function ManualEntryIntake({ onComplete }: ManualEntryIntakeProps) {
     console.log('Creating case from manual entry:', formData);
     onComplete();
   };
+
+  // Real-time duplicate detection
+  useEffect(() => {
+    const { firstName, lastName, dateOfBirth } = formData;
+    
+    // Only run check if we have minimum required data
+    if (firstName.length >= 3 && lastName.length >= 3 && dateOfBirth) {
+      // Simulate API call to check for duplicates
+      setTimeout(() => {
+        // Mock match found
+        if (firstName.toLowerCase() === 'maria' && lastName.toLowerCase() === 'rodriguez') {
+          setPossibleMatches([
+            { 
+              caseId: 'PSP-2024-1847', 
+              patientName: 'Maria Rodriguez', 
+              phone: '(555) 234-9012' 
+            }
+          ]);
+        } else {
+          setPossibleMatches([]);
+        }
+      }, 300);
+    } else {
+      setPossibleMatches([]);
+    }
+  }, [formData.firstName, formData.lastName, formData.dateOfBirth]);
 
   return (
     <div className="h-full flex flex-col">
@@ -100,6 +134,29 @@ export function ManualEntryIntake({ onComplete }: ManualEntryIntakeProps) {
                   required
                 />
               </div>
+
+              {/* Duplicate Detection Banner */}
+              {possibleMatches.length > 0 && (
+                <div className="bg-[#f59e0b]/10 border border-[#f59e0b] rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-[#f59e0b] mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm text-neutral-900">
+                        Possible match found — {possibleMatches[0].patientName} · {possibleMatches[0].caseId} · {possibleMatches[0].phone}
+                      </p>
+                      <div className="mt-2 flex items-center gap-3">
+                        <button className="text-sm text-[#f59e0b] hover:text-[#d97706] font-medium">
+                          Review match
+                        </button>
+                        <span className="text-neutral-400">·</span>
+                        <button className="text-sm text-neutral-600 hover:text-neutral-700 font-medium">
+                          Continue as new
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

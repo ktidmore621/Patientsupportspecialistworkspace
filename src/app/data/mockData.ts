@@ -268,7 +268,13 @@ export const mockCases: Case[] = [
       actionType: 'review',
       dueDate: '2024-04-02'
     },
-    blockers: [],
+    blockers: [
+      {
+        type: 'pending_verification',
+        description: 'Income docs pending',
+        severity: 'warning'
+      }
+    ],
     assignedTo: 'Sarah Mitchell',
     createdAt: '2024-03-27T10:20:00Z',
     lastUpdated: '2024-03-30T09:15:00Z',
@@ -304,7 +310,13 @@ export const mockCases: Case[] = [
       actionType: 'review',
       dueDate: '2024-04-01'
     },
-    blockers: [],
+    blockers: [
+      {
+        type: 'pending_verification',
+        description: 'Benefit verification in progress',
+        severity: 'warning'
+      }
+    ],
     assignedTo: 'Sarah Mitchell',
     createdAt: '2024-03-25T13:45:00Z',
     lastUpdated: '2024-03-29T16:30:00Z',
