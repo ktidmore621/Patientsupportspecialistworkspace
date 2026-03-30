@@ -3,7 +3,7 @@ import { Filter, Download, Search, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router';
 import { mockCases } from '../data/mockData';
 import { CaseDrawer } from './CaseDrawer';
-import { getNBAChipStyle, getNBAChipLabel, getDaysOpenColor, getStatusLabel, getStatusPillStyle } from '../utils/caseHelpers';
+import { getNBAChipStyle, getNBAChipLabel, getDaysOpenColor, getStatusLabel, getStatusPillStyle, getProgramDisplay } from '../utils/caseHelpers';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 
 export function Cases() {
@@ -174,22 +174,17 @@ export function Cases() {
                             className="px-4 py-3 cursor-pointer"
                             onClick={() => setSelectedCaseId(caseItem.id)}
                           >
-                            <span className={`inline-flex px-2 py-1 rounded-md border text-xs font-medium capitalize ${
-                              caseItem.status === 'active'
-                                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                : caseItem.status === 'temp'
-                                ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                : 'bg-neutral-50 text-neutral-600 border-neutral-200'
-                            }`}>
-                              {caseItem.status}
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap ${getStatusPillStyle(caseItem.status)}`}>
+                              <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
+                              <span>{getStatusLabel(caseItem.status)}</span>
                             </span>
                           </td>
                           <td 
                             className="px-4 py-3 cursor-pointer"
                             onClick={() => setSelectedCaseId(caseItem.id)}
                           >
-                            <span className="text-sm text-neutral-700 capitalize">
-                              {caseItem.program.replace('_', ' ')}
+                            <span className="text-sm text-neutral-700">
+                              {getProgramDisplay(caseItem.program)}
                             </span>
                           </td>
                           <td 

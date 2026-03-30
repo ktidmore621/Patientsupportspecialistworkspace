@@ -48,9 +48,18 @@ export function getProgramDisplay(program: string): string {
     'copay_assistance': 'Copay Assistance',
     'free_drug': 'Free Drug',
     'patient_support': 'Patient Support',
-    'copay': 'Copay Assistance'
+    'copay': 'Copay Assistance',
+    'pap': 'PAP',
+    'bridge': 'Bridge'
   };
-  return labels[program] || program.replace(/_/g, ' ');
+  
+  // Check if it's already in the labels map
+  if (labels[program.toLowerCase()]) {
+    return labels[program.toLowerCase()];
+  }
+  
+  // Otherwise, capitalize first letter of each word
+  return program.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
 // Get status pill styling

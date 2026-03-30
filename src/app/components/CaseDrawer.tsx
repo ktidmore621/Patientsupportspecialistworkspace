@@ -1,6 +1,7 @@
 import { X, User, FileText, Building2, Pill, Sparkles, CheckCircle2, Edit3, Clock } from 'lucide-react';
 import { Case } from '../types/case';
 import { useState } from 'react';
+import { getStatusLabel, getStatusPillStyle, getProgramDisplay } from '../utils/caseHelpers';
 
 interface CaseDrawerProps {
   case: Case;
@@ -92,15 +93,11 @@ export function CaseDrawer({ case: caseData, onClose }: CaseDrawerProps) {
             </div>
             
             <div className="flex items-center gap-2">
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm ${
-                caseData.status === 'active'
-                  ? 'bg-[#3b82f6]/10 text-[#3b82f6]'
-                  : caseData.status === 'temp'
-                  ? 'bg-[#f59e0b]/10 text-[#f59e0b]'
-                  : 'bg-neutral-100 text-neutral-600'
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm whitespace-nowrap ${
+                getStatusPillStyle(caseData.status)
               }`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-                <span className="capitalize">{caseData.status}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
+                <span>{getStatusLabel(caseData.status)}</span>
               </span>
               <span className="px-3 py-1.5 rounded-lg bg-neutral-100 text-sm text-neutral-600">
                 {caseData.daysOpen} days

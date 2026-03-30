@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import { mockCases, priorityActions, queueMetrics } from '../data/mockData';
 import { Case, ActionType } from '../types/case';
 import { CaseDrawer } from './CaseDrawer';
-import { getStatusLabel, getStatusPillStyle, getDaysOpenColor } from '../utils/caseHelpers';
+import { getStatusLabel, getStatusPillStyle, getDaysOpenColor, getProgramDisplay } from '../utils/caseHelpers';
 
 export function QueueView() {
   const [showAllCases, setShowAllCases] = useState(false);
@@ -130,13 +130,7 @@ export function QueueView() {
                                 <button
                                   onClick={() => handleSelectCase(caseData.id)}
                                   style={{ width: '160px' }}
-                                  className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                                    caseData.nextBestAction.actionType === 'confirm'
-                                      ? 'bg-[#10b981] hover:bg-[#0ea572] text-white'
-                                      : caseData.nextBestAction.actionType === 'review'
-                                      ? 'border border-[#8b8b8e] text-[#8b8b8e] hover:bg-neutral-50'
-                                      : 'bg-[#10b981] hover:bg-[#0ea572] text-white'
-                                  }`}
+                                  className="px-5 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap bg-[#10b981] hover:bg-[#0ea572] text-white"
                                 >
                                   {action.actionButton}
                                 </button>
@@ -186,7 +180,7 @@ export function QueueView() {
                                   <div>
                                     <div className="text-xs text-neutral-500 mb-1">Program</div>
                                     <div className="text-sm font-medium text-neutral-900 capitalize">
-                                      {caseData.program.replace('_', ' ')}
+                                      {getProgramDisplay(caseData.program)}
                                     </div>
                                   </div>
                                 </div>
@@ -274,16 +268,10 @@ export function QueueView() {
                             onClick={() => handleSelectCase(caseItem.id)}
                           >
                             <span
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ${
-                                caseItem.status === 'active'
-                                  ? 'bg-[#3b82f6]/10 text-[#3b82f6]'
-                                  : caseItem.status === 'temp'
-                                  ? 'bg-[#f59e0b]/10 text-[#f59e0b]'
-                                  : 'bg-neutral-100 text-neutral-600'
-                              }`}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap ${getStatusPillStyle(caseItem.status)}`}
                             >
-                              <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-                              <span className="capitalize">{caseItem.status}</span>
+                              <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
+                              <span>{getStatusLabel(caseItem.status)}</span>
                             </span>
                           </td>
                           <td 
@@ -330,7 +318,7 @@ export function QueueView() {
                             onClick={() => handleSelectCase(caseItem.id)}
                           >
                             <span className="text-sm text-neutral-600 capitalize">
-                              {caseItem.program.replace('_', ' ')}
+                              {getProgramDisplay(caseItem.program)}
                             </span>
                           </td>
                         </tr>
@@ -398,8 +386,8 @@ export function QueueView() {
                               className="px-4 py-3 cursor-pointer"
                               onClick={() => handleSelectCase(caseItem.id)}
                             >
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-purple-50 text-purple-700">
-                                <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap bg-purple-50 text-purple-700">
+                                <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
                                 <span>In Review</span>
                               </span>
                             </td>
@@ -447,7 +435,7 @@ export function QueueView() {
                               onClick={() => handleSelectCase(caseItem.id)}
                             >
                               <span className="text-sm text-neutral-600 capitalize">
-                                {caseItem.program.replace('_', ' ')}
+                                {getProgramDisplay(caseItem.program)}
                               </span>
                             </td>
                           </tr>

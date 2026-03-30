@@ -109,11 +109,11 @@ export function CaseRecord() {
             </h1>
             <span className="text-neutral-500">•</span>
             <span className="text-neutral-600">{caseData.id}</span>
-            <span className={`px-3 py-1.5 rounded-lg text-sm ${getStatusColor(caseData.status)}`}>
+            <span className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap ${getStatusColor(caseData.status)}`}>
               {getStatusDisplay(caseData.status)}
             </span>
             <span className="text-neutral-500">•</span>
-            <span className="text-sm text-neutral-600 capitalize">{getProgramDisplay(caseData.program)}</span>
+            <span className="text-sm text-neutral-600">{getProgramDisplay(caseData.program)}</span>
             <span className="text-neutral-500">•</span>
             <span className="text-sm text-neutral-600">Day {caseData.daysOpen}</span>
             <span className="text-neutral-500">•</span>
