@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AlertCircle, ArrowRight, Clock, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link } from 'react-router';
 import { mockCases, priorityActions, queueMetrics } from '../data/mockData';
 import { Case, ActionType } from '../types/case';
 import { CaseDrawer } from './CaseDrawer';
@@ -219,8 +220,8 @@ export function QueueView() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2>Cases</h2>
-                  <button onClick={() => setShowAllCases(!showAllCases)} className="text-sm text-blue-700 hover:text-blue-800 font-medium">
-                    {showAllCases ? 'Show fewer cases ↑' : 'Show all cases →'}
+                  <button className="text-sm text-blue-700 hover:text-blue-800 font-medium">
+                    Show all cases →
                   </button>
                 </div>
 
@@ -252,20 +253,26 @@ export function QueueView() {
                       {cases.map((caseItem) => (
                         <tr
                           key={caseItem.id}
-                          onClick={() => handleSelectCase(caseItem.id)}
-                          className={`cursor-pointer transition-colors ${
+                          className={`transition-colors ${
                             caseItem.id === selectedCase?.id
                               ? 'bg-blue-50'
                               : 'hover:bg-neutral-50'
                           }`}
                         >
                           <td className="px-4 py-3">
-                            <div className="text-sm font-medium text-neutral-900">
+                            <Link
+                              to={`/cases/${caseItem.id}`}
+                              className="text-sm font-medium text-blue-700 hover:text-blue-900 hover:underline block"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               {caseItem.patient.firstName} {caseItem.patient.lastName}
-                            </div>
+                            </Link>
                             <div className="text-xs text-neutral-500">{caseItem.id}</div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td 
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => handleSelectCase(caseItem.id)}
+                          >
                             <span
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ${
                                 caseItem.status === 'active'
@@ -279,12 +286,18 @@ export function QueueView() {
                               <span className="capitalize">{caseItem.status}</span>
                             </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td 
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => handleSelectCase(caseItem.id)}
+                          >
                             <div className="text-sm text-neutral-900">
                               {caseItem.nextBestAction.action}
                             </div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td 
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => handleSelectCase(caseItem.id)}
+                          >
                             {caseItem.blockers.length > 0 ? (
                               <div className="flex items-center gap-1.5">
                                 <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
@@ -296,7 +309,10 @@ export function QueueView() {
                               <span className="text-xs text-neutral-400">None</span>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td 
+                            className="px-4 py-3 text-right cursor-pointer"
+                            onClick={() => handleSelectCase(caseItem.id)}
+                          >
                             <span
                               className={`text-sm font-medium ${
                                 caseItem.daysOpen > 10
@@ -309,7 +325,10 @@ export function QueueView() {
                               {caseItem.daysOpen}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td 
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => handleSelectCase(caseItem.id)}
+                          >
                             <span className="text-sm text-neutral-600 capitalize">
                               {caseItem.program.replace('_', ' ')}
                             </span>
@@ -359,31 +378,43 @@ export function QueueView() {
                         eligibilityCases.map((caseItem) => (
                           <tr
                             key={caseItem.id}
-                            onClick={() => handleSelectCase(caseItem.id)}
-                            className={`cursor-pointer transition-colors ${
+                            className={`transition-colors ${
                               caseItem.id === selectedCase?.id
                                 ? 'bg-blue-50'
                                 : 'hover:bg-neutral-50'
                             }`}
                           >
                             <td className="px-4 py-3">
-                              <div className="text-sm font-medium text-neutral-900">
+                              <Link
+                                to={`/cases/${caseItem.id}`}
+                                className="text-sm font-medium text-blue-700 hover:text-blue-900 hover:underline block"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 {caseItem.patient.firstName} {caseItem.patient.lastName}
-                              </div>
+                              </Link>
                               <div className="text-xs text-neutral-500">{caseItem.id}</div>
                             </td>
-                            <td className="px-4 py-3">
+                            <td 
+                              className="px-4 py-3 cursor-pointer"
+                              onClick={() => handleSelectCase(caseItem.id)}
+                            >
                               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-purple-50 text-purple-700">
                                 <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                                 <span>In Review</span>
                               </span>
                             </td>
-                            <td className="px-4 py-3">
+                            <td 
+                              className="px-4 py-3 cursor-pointer"
+                              onClick={() => handleSelectCase(caseItem.id)}
+                            >
                               <div className="text-sm text-neutral-900">
                                 {caseItem.nextBestAction.action}
                               </div>
                             </td>
-                            <td className="px-4 py-3">
+                            <td 
+                              className="px-4 py-3 cursor-pointer"
+                              onClick={() => handleSelectCase(caseItem.id)}
+                            >
                               {caseItem.blockers.length > 0 ? (
                                 <div className="flex items-center gap-1.5">
                                   <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
@@ -395,7 +426,10 @@ export function QueueView() {
                                 <span className="text-xs text-neutral-400">None</span>
                               )}
                             </td>
-                            <td className="px-4 py-3 text-right">
+                            <td 
+                              className="px-4 py-3 text-right cursor-pointer"
+                              onClick={() => handleSelectCase(caseItem.id)}
+                            >
                               <span
                                 className={`text-sm font-medium ${
                                   caseItem.daysOpen > 10
@@ -408,7 +442,10 @@ export function QueueView() {
                                 {caseItem.daysOpen}
                               </span>
                             </td>
-                            <td className="px-4 py-3">
+                            <td 
+                              className="px-4 py-3 cursor-pointer"
+                              onClick={() => handleSelectCase(caseItem.id)}
+                            >
                               <span className="text-sm text-neutral-600 capitalize">
                                 {caseItem.program.replace('_', ' ')}
                               </span>

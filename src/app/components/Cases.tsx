@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Filter, Download, Search, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router';
 import { mockCases } from '../data/mockData';
 import { CaseDrawer } from './CaseDrawer';
 import { getNBAChipStyle, getNBAChipLabel, getDaysOpenColor, getStatusLabel, getStatusPillStyle } from '../utils/caseHelpers';
@@ -82,10 +83,9 @@ export function Cases() {
                     className="appearance-none pl-3 pr-9 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
                   >
                     <option value="all">All Programs</option>
-                    <option value="copay">Copay Assistance</option>
-                    <option value="pap">Free Drug (PAP)</option>
-                    <option value="bridge">Bridge</option>
-                    <option value="quick_start">Quick Start</option>
+                    <option value="copay_assistance">Copay Assistance</option>
+                    <option value="free_drug">Free Drug</option>
+                    <option value="patient_support">Patient Support</option>
                   </select>
                   <ChevronDown className="absolute right-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-500 pointer-events-none" />
                 </div>
@@ -142,19 +142,25 @@ export function Cases() {
                       {filteredCases.map((caseItem) => (
                         <tr
                           key={caseItem.id}
-                          onClick={() => setSelectedCaseId(caseItem.id)}
-                          className={`cursor-pointer transition-colors ${
+                          className={`transition-colors ${
                             caseItem.id === selectedCaseId
                               ? 'bg-blue-50'
                               : 'hover:bg-neutral-50'
                           }`}
                         >
                           <td className="px-4 py-3">
-                            <span className="text-sm font-mono text-blue-700">
+                            <Link 
+                              to={`/cases/${caseItem.id}`}
+                              className="text-sm font-mono text-blue-700 hover:text-blue-900 hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               {caseItem.id}
-                            </span>
+                            </Link>
                           </td>
-                          <td className="px-4 py-3">
+                          <td 
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => setSelectedCaseId(caseItem.id)}
+                          >
                             <div>
                               <p className="text-sm font-medium text-neutral-900">
                                 {caseItem.patient.firstName} {caseItem.patient.lastName}
@@ -164,7 +170,10 @@ export function Cases() {
                               </p>
                             </div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td 
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => setSelectedCaseId(caseItem.id)}
+                          >
                             <span className={`inline-flex px-2 py-1 rounded-md border text-xs font-medium capitalize ${
                               caseItem.status === 'active'
                                 ? 'bg-blue-50 text-blue-700 border-blue-200'
@@ -175,22 +184,34 @@ export function Cases() {
                               {caseItem.status}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td 
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => setSelectedCaseId(caseItem.id)}
+                          >
                             <span className="text-sm text-neutral-700 capitalize">
                               {caseItem.program.replace('_', ' ')}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td 
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => setSelectedCaseId(caseItem.id)}
+                          >
                             <span className={`text-sm font-medium ${getDaysOpenColor(caseItem.daysOpen)}`}>
                               {caseItem.daysOpen}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td 
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => setSelectedCaseId(caseItem.id)}
+                          >
                             <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getNBAChipStyle(caseItem.nextBestAction.actionType)}`}>
                               {getNBAChipLabel(caseItem.nextBestAction.actionType)}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td 
+                            className="px-4 py-3 cursor-pointer"
+                            onClick={() => setSelectedCaseId(caseItem.id)}
+                          >
                             {caseItem.blockers.length > 0 ? (
                               <Tooltip>
                                 <TooltipTrigger asChild>
