@@ -1,0 +1,173 @@
+name: Restore Deployment Config After Figma
+
+on:
+  push:
+    branches: [main]
+
+# Needs write access to commit the restored files back to main
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    # Only run when Figma Make is the pusher.
+    # When this workflow pushes its own restoration commit, github.actor will
+    # be 'github-actions[bot]' - not 'figma[bot]' - so the workflow skips
+    # itself and there is no infinite loop.
+    if: github.actor == 'figma[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore files Figma Make may have deleted or regressed
+        run: |
+          set -e
+          CHANGED=0
+
+          # deploy.yml
+          if [ ! -f ".github/workflows/deploy.yml" ] || \
+             ! grep -q "actions/deploy-pages" ".github/workflows/deploy.yml"; then
+            mkdir -p .github/workflows
+            cat > .github/workflows/deploy.yml << 'DEPLOY_EOF'
+          name: Deploy to GitHub Pages
+          on:
+            push:
+              branches: [main]
+            workflow_dispatch:
+          permissions:
+            contents: read
+            pages: write
+            id-token: write
+          concurrency:
+            group: pages
+            cancel-in-progress: true
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v4
+                - uses: actions/setup-node@v4
+                  with:
+                    node-version: 20
+                - run: npm install
+                - run: npm run build
+                - uses: actions/upload-pages-artifact@v3
+                  with:
+                    path: dist
+            deploy:
+              needs: build
+              runs-on: ubuntu-latest
+              environment:
+                name: github-pages
+                url: https://ktidmore621.github.io/Patientsupportspecialistworkspace/
+              steps:
+                - uses: actions/deploy-pages@v4
+                  id: deployment
+          DEPLOY_EOF
+            CHANGED=1
+            echo "Restored .github/workflows/deploy.yml"
+          fi
+
+          # .gitignore
+          if [ ! -f ".gitignore" ]; then
+            printf 'node_modules/\ndist/\nbuild/\n.env\n.env.local\n.env.*.local\n.vscode/\n.idea/\n.DS_Store\nThumbs.db\n*.log\nnpm-debug.log*\n' > .gitignore
+            CHANGED=1
+            echo "Restored .gitignore"
+          fi
+
+          # public/404.html
+          if [ ! -f "public/404.html" ]; then
+            mkdir -p public
+            cat > public/404.html << 'HTML404_EOF'
+          <!DOCTYPE html><html><head><meta charset="utf-8" />
+          <title>Patient Support Specialist Workspace</title>
+          <script>
+            var s=1,l=window.location;
+            l.replace(l.protocol+'//'+l.hostname+(l.port?':'+l.port:'')+
+              l.pathname.split('/').slice(0,1+s).join('/')+'/?p=/'+
+              l.pathname.slice(1).split('/').slice(s).join('/').replace(/&/g,'~and~')+
+              (l.search?'&q='+l.search.slice(1).replace(/&/g,'~and~'):'')+l.hash);
+          </script></head><body></body></html>
+          HTML404_EOF
+            CHANGED=1
+            echo "Restored public/404.html"
+          fi
+
+          # tsconfig.json
+          if [ ! -f "tsconfig.json" ]; then
+            cat > tsconfig.json << 'TSCONFIG_EOF'
+          {"compilerOptions":{"target":"ES2020","useDefineForClassFields":true,"lib":["ES2020","DOM","DOM.Iterable"],"module":"ESNext","skipLibCheck":true,"moduleResolution":"bundler","allowImportingTsExtensions":true,"resolveJsonModule":true,"isolatedModules":true,"noEmit":true,"jsx":"react-jsx","strict":true,"noUnusedLocals":true,"noUnusedParameters":true,"noFallthroughCasesInSwitch":true,"baseUrl":".","paths":{"@/*":["./src/*"]}},"include":["src"]}
+          TSCONFIG_EOF
+            CHANGED=1
+            echo "Restored tsconfig.json"
+          fi
+
+          # vite.config.ts - Figma removes the production base path
+          if ! grep -q "Patientsupportspecialistworkspace" vite.config.ts 2>/dev/null; then
+            cat > vite.config.ts << 'VITE_EOF'
+          import { defineConfig } from 'vite'
+          import path from 'path'
+          import tailwindcss from '@tailwindcss/vite'
+          import react from '@vitejs/plugin-react'
+          export default defineConfig(({ command }) => ({
+            base: command === 'build' ? '/Patientsupportspecialistworkspace/' : '/',
+            plugins: [react(), tailwindcss()],
+            resolve: { alias: { '@': path.resolve(__dirname, './src') } },
+            assetsInclude: ['**/*.svg', '**/*.csv'],
+          }))
+          VITE_EOF
+            CHANGED=1
+            echo "Restored vite.config.ts"
+          fi
+
+          # index.html - Figma removes the SPA path-restore script
+          if ! grep -q "history.replaceState" index.html 2>/dev/null; then
+            cat > index.html << 'INDEX_EOF'
+          <!DOCTYPE html><html lang="en"><head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Patient Support Specialist Workspace</title>
+          </head><body>
+            <script>(function(l){if(l.search[1]=='/'){var d=l.search.slice(1).split('&').map(function(s){return s.replace(/~and~/g,'&');}).join('?');window.history.replaceState(null,null,l.pathname.slice(0,-1)+d+l.hash);}}(window.location));</script>
+            <div id="root"></div>
+            <script type="module" src="/src/main.tsx"></script>
+          </body></html>
+          INDEX_EOF
+            CHANGED=1
+            echo "Restored index.html"
+          fi
+
+          # src/app/routes.tsx - Figma removes the basename option
+          if ! grep -q "basename" src/app/routes.tsx 2>/dev/null; then
+            cat > src/app/routes.tsx << 'ROUTES_EOF'
+          import { createBrowserRouter } from 'react-router';
+          import { RootLayout } from './components/RootLayout';
+          import { QueueView } from './components/QueueView';
+          import { Cases } from './components/Cases';
+          import { CaseRecord } from './components/CaseRecord';
+          export const router = createBrowserRouter(
+            [{path:'/',Component:RootLayout,children:[
+              {index:true,Component:QueueView},
+              {path:'cases',Component:Cases},
+              {path:'cases/:caseId',Component:CaseRecord},
+              {path:'*',Component:NotFound},
+            ]}],
+            {basename:import.meta.env.BASE_URL}
+          );
+          function NotFound(){return(<div className="flex items-center justify-center h-full"><div className="text-center"><h1 className="mb-2">Page Not Found</h1><p className="text-neutral-600">The page you're looking for doesn't exist.</p></div></div>);}
+          ROUTES_EOF
+            CHANGED=1
+            echo "Restored src/app/routes.tsx"
+          fi
+
+          if [ "$CHANGED" = "1" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add .
+            git commit -m "Auto-restore deployment config overwritten by Figma Make"
+            git push
+          else
+            echo "All deployment files intact - nothing to restore."
+          fi
