@@ -145,7 +145,7 @@ export function CommandPalette({ isOpen, onClose, onExecuteAction }: CommandPale
     });
 
     // Mock documents (if query matches)
-    if ('hipaa'.includes(lowerQuery) || 'document'.includes(lowerQuery) || 'form'.includes(lowerQuery)) {
+    if (lowerQuery.includes('hipaa') || lowerQuery.includes('document') || lowerQuery.includes('form')) {
       results.push({
         id: 'doc-1',
         label: 'HIPAA_Authorization.pdf',
@@ -156,7 +156,7 @@ export function CommandPalette({ isOpen, onClose, onExecuteAction }: CommandPale
     }
 
     // Mock communications
-    if ('email'.includes(lowerQuery) || 'outreach'.includes(lowerQuery) || 'message'.includes(lowerQuery)) {
+    if (lowerQuery.includes('email') || lowerQuery.includes('outreach') || lowerQuery.includes('message')) {
       results.push({
         id: 'comm-1',
         label: 'Email – HIPAA Request',
