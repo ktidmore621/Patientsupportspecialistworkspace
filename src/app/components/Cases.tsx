@@ -82,9 +82,10 @@ export function Cases() {
                     className="appearance-none pl-3 pr-9 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
                   >
                     <option value="all">All Programs</option>
-                    <option value="copay_assistance">Copay Assistance</option>
-                    <option value="free_drug">Free Drug</option>
-                    <option value="patient_support">Patient Support</option>
+                    <option value="copay">Copay Assistance</option>
+                    <option value="pap">Free Drug (PAP)</option>
+                    <option value="bridge">Bridge</option>
+                    <option value="quick_start">Quick Start</option>
                   </select>
                   <ChevronDown className="absolute right-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-500 pointer-events-none" />
                 </div>
