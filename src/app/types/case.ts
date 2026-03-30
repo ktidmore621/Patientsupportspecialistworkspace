@@ -1,6 +1,6 @@
 // Core types for PSP Enrollment Workspace
 
-export type CaseStatus = 'temp' | 'active' | 'approved' | 'denied' | 'closed' | 'in_review' | 'enrolled' | 'stalled';
+export type CaseStatus = 'temp' | 'active' | 'approved' | 'denied' | 'closed' | 'in_review' | 'pending_eligibility' | 'enrolled' | 'stalled';
 export type ProgramType = 'copay' | 'pap' | 'bridge' | 'quick_start';
 export type InsuranceType = 'commercial' | 'medicare' | 'medicaid' | 'uninsured';
 export type Priority = 'urgent' | 'high' | 'medium' | 'low';

@@ -219,8 +219,8 @@ export function QueueView() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2>Cases</h2>
-                  <button className="text-sm text-blue-700 hover:text-blue-800 font-medium">
-                    Show all cases →
+                  <button onClick={() => setShowAllCases(!showAllCases)} className="text-sm text-blue-700 hover:text-blue-800 font-medium">
+                    {showAllCases ? 'Show fewer cases ↑' : 'Show all cases →'}
                   </button>
                 </div>
 
