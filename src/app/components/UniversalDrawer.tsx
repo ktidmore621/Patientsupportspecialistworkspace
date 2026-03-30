@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, ArrowLeft } from 'lucide-react';
 import { DrawerContent } from './RootLayout';
 import { IntakeSelection } from './drawer/IntakeSelection';
@@ -21,9 +21,11 @@ export function UniversalDrawer({ content, onClose }: UniversalDrawerProps) {
   const isOpen = content.type !== 'none';
 
   // Reset intake selection when drawer closes or content changes
-  if (!isOpen && selectedIntake) {
-    setSelectedIntake(null);
-  }
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedIntake(null);
+    }
+  }, [isOpen]);
 
   const handleBack = () => {
     setSelectedIntake(null);
